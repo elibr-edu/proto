@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package sso;
+
+option go_package = "github.com/WhiCu/elibr-proto/gen/go/sso;sso";
+
+
+import "google/protobuf/timestamp.proto";
+import "model/model.proto";
+
+/**
+ * Сервис аутентификации и управления сессиями
+ */
+service AuthService {
+    /**
+     * Регистрация нового пользователя
+     * Требует: username, email, password
+     * Возвращает: токены и профиль пользователя
+     */
+    rpc Register(RegisterRequest) returns (AuthResponse);
+    
+    /**
+     * Аутентификация пользователя
+     * Поддерживает: email/password, username/password
+     * Возвращает: токены доступа и профиль
+     */
+    rpc Login(LoginRequest) returns (AuthResponse);
+    
+    /**
+     * Проверка валидности access token
+     * Используется для авторизации запросов между сервисами
+     */
+    rpc ValidateToken(ValidateTokenRequest) returns (TokenValidationResponse);
+    
+    /**
+     * Обновление токенов доступа
+     * Требует: валидный refresh_token
+     * Возвращает: новую пару токенов
+     */
+    rpc RefreshTokens(RefreshTokenRequest) returns (TokenRefreshResponse);
+    
+    /**
+     * Завершение сессии
+     * Инвалидирует оба токена (добавляет в revocation list)
+     */
+    rpc Logout(LogoutRequest) returns (model.OperationStatus);
+}
+
+// ========== Регистрация ========== //
+
+message RegisterRequest {
+    string username = 1;    // Обязательное, 3-30 символов
+    string email = 2;       // Обязательное, валидный email
+    string password = 3;    // Минимум 8 символов, буквы+цифры
+}
+
+// ========== Аутентификация ========== //
+
+message LoginRequest {
+    oneof identifier {
+        string username = 1;  // Логин пользователя
+        string email = 2;      // Email пользователя
+    }
+    string password = 3;      // Пароль в открытом виде
+    string device_id = 4;      // Идентификатор устройства (опционально)
+}
+
+// ========== Общий ответ аутентификации ========== //
+
+message AuthResponse {
+    model.OperationStatus status = 1;  // Статус операции
+    model.AuthTokens tokens = 2;       // Сгенерированные токены
+    model.UserProfile profile = 3;      // Профиль пользователя
+}
+
+// ========== Валидация токена ========== //
+
+message ValidateTokenRequest {
+    string access_token = 1;  // JWT из заголовка Authorization
+}
+
+message TokenValidationResponse {
+    model.OperationStatus status = 1;     // Результат проверки
+    optional model.UserProfile user = 2;   // Профиль (при успешной проверке)
+    optional google.protobuf.Timestamp expires_at = 3;  // Срок действия токена
+}
+
+// ========== Обновление токенов ========== //
+
+message RefreshTokenRequest {
+    string refresh_token = 1;  // Токен из безопасного хранилища
+    string device_id = 2;      // Идентификатор устройства (опционально)
+}
+
+message TokenRefreshResponse {
+    model.OperationStatus status = 1;
+    model.AuthTokens tokens = 2;  // Новая пара токенов
+}
+
+// ========== Завершение сессии ========== //
+
+message LogoutRequest {
+    string access_token = 1;   // Текущий access token
+    string refresh_token = 2;  // Текущий refresh token
+}

@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package model;
+
+option go_package = "github.com/WhiCu/elibr-proto/gen/go/model;model";
+// Для Python используем стандартную генерацию gRPC
+// py_generic_services устарело и не рекомендуется
+
+import "google/protobuf/timestamp.proto";
+
+/**
+ * Статус выполнения операции
+ * Используется во всех ответах API
+ */
+message OperationStatus {
+    bool success = 1;          // Флаг успешного выполнения
+    optional string error = 2;  // Детали ошибки (при success=false)
+}
+
+/**
+ * Пара токенов аутентификации
+ * Срок действия access_token всегда ограничен
+ */
+message AuthTokens {
+    string access_token = 1;            // JWT для доступа к API
+    string refresh_token = 2;           // Токен для обновления сессии
+    google.protobuf.Timestamp access_token_expires_at = 3;  // Срок действия access_token
+}
+
+/**
+ * Профиль пользователя системы
+ */
+message UserProfile {
+    string id = 1;              // Уникальный идентификатор (UUIDv4)
+    string username = 2;        // Уникальное имя пользователя
+    string email = 3;           // Основной email (верифицированный)
+    repeated string roles = 4;   // Список ролей (например: ["user", "admin"])
+    google.protobuf.Timestamp created_at = 5; // Дата создания аккаунта
+}

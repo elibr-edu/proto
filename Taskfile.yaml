@@ -1,0 +1,42 @@
+version: '3'
+
+silent: false
+
+tasks:
+
+  generate:
+    aliases:
+      - gen
+    desc: "Generate code from proto files"
+    cmds:
+      - task: generate-python
+      - task: generate-go
+  generate-python:
+    aliases:
+      - gen-python
+    desc: "Generate python code from proto files"
+    cmds:
+      - protoc 
+        -I proto 
+        proto/model/*.proto proto/sso/*.proto 
+        --python_out=./gen/python/ 
+        --pyi_out=./gen/python/ 
+        --grpc_python_out=./gen/python/ 
+        --mypy_out=./gen/python/
+  generate-go:
+    aliases:
+      - gen-go
+    desc: "Generate go code from proto files"
+    cmds:
+      - protoc 
+        -I proto 
+        proto/model/*.proto proto/sso/*.proto 
+        --go_out=./gen/go/ 
+        --go_opt=paths=source_relative 
+        --go-grpc_out=./gen/go/ 
+        --go-grpc_opt=paths=source_relative
+  
+  run:
+    desc: "Run the server"
+    cmds:
+      - go run cmd/main.go
