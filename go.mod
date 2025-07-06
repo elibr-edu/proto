@@ -1,4 +1,4 @@
-module github.com/WhiCu/elibr-proto
+module github.com/elibr-edu/proto
 
 go 1.24.3
 

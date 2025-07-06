@@ -3,7 +3,7 @@ managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      value: github.com/WhiCu/elibr-proto/gen/go
+      value: github.com/elibr-edu/proto/gen/go
 plugins:
   - local: protoc-gen-go
     out: gen/go
