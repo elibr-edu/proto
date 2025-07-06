@@ -1,12 +1,9 @@
 syntax = "proto3";
 
-package sso;
-
-option go_package = "github.com/WhiCu/elibr-proto/gen/go/sso;sso";
-
+package sso.v1;
 
 import "google/protobuf/timestamp.proto";
-import "model/model.proto";
+import "model/v1/model.proto";
 
 /**
  * Сервис аутентификации и управления сессиями
@@ -17,33 +14,33 @@ service AuthService {
      * Требует: username, email, password
      * Возвращает: токены и профиль пользователя
      */
-    rpc Register(RegisterRequest) returns (AuthResponse);
+    rpc Register(RegisterRequest) returns (RegisterResponse);
     
     /**
      * Аутентификация пользователя
      * Поддерживает: email/password, username/password
      * Возвращает: токены доступа и профиль
      */
-    rpc Login(LoginRequest) returns (AuthResponse);
+    rpc Login(LoginRequest) returns (LoginResponse);
     
     /**
      * Проверка валидности access token
      * Используется для авторизации запросов между сервисами
      */
-    rpc ValidateToken(ValidateTokenRequest) returns (TokenValidationResponse);
+    rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
     
     /**
      * Обновление токенов доступа
      * Требует: валидный refresh_token
      * Возвращает: новую пару токенов
      */
-    rpc RefreshTokens(RefreshTokenRequest) returns (TokenRefreshResponse);
+    rpc RefreshTokens(RefreshTokensRequest) returns (RefreshTokensResponse);
     
     /**
      * Завершение сессии
      * Инвалидирует оба токена (добавляет в revocation list)
      */
-    rpc Logout(LogoutRequest) returns (model.OperationStatus);
+    rpc Logout(LogoutRequest) returns (LogoutResponse);
 }
 
 // ========== Регистрация ========== //
@@ -52,6 +49,12 @@ message RegisterRequest {
     string username = 1;    // Обязательное, 3-30 символов
     string email = 2;       // Обязательное, валидный email
     string password = 3;    // Минимум 8 символов, буквы+цифры
+}
+
+message RegisterResponse {
+    model.v1.OperationStatus status = 1;  // Статус операции
+    model.v1.AuthTokens tokens = 2;       // Сгенерированные токены
+    model.v1.UserProfile profile = 3;      // Профиль пользователя
 }
 
 // ========== Аутентификация ========== //
@@ -64,12 +67,10 @@ message LoginRequest {
     string password = 3;      // Пароль в открытом виде
 }
 
-// ========== Общий ответ аутентификации ========== //
-
-message AuthResponse {
-    model.OperationStatus status = 1;  // Статус операции
-    model.AuthTokens tokens = 2;       // Сгенерированные токены
-    model.UserProfile profile = 3;      // Профиль пользователя
+message LoginResponse {
+    model.v1.OperationStatus status = 1;  // Статус операции
+    model.v1.AuthTokens tokens = 2;       // Сгенерированные токены
+    model.v1.UserProfile profile = 3;      // Профиль пользователя
 }
 
 // ========== Валидация токена ========== //
@@ -78,22 +79,22 @@ message ValidateTokenRequest {
     string access_token = 1;  // JWT из заголовка Authorization
 }
 
-message TokenValidationResponse {
-    model.OperationStatus status = 1;     // Результат проверки
-    optional model.UserProfile user = 2;   // Профиль (при успешной проверке)
+message ValidateTokenResponse {
+    model.v1.OperationStatus status = 1;     // Результат проверки
+    optional model.v1.UserProfile user = 2;   // Профиль (при успешной проверке)
     optional google.protobuf.Timestamp expires_at = 3;  // Срок действия токена
 }
 
 // ========== Обновление токенов ========== //
 
-message RefreshTokenRequest {
+message RefreshTokensRequest {
     string refresh_token = 1;  // Токен из безопасного хранилища
     string device_id = 2;      // Идентификатор устройства (опционально)
 }
 
-message TokenRefreshResponse {
-    model.OperationStatus status = 1;
-    model.AuthTokens tokens = 2;  // Новая пара токенов
+message RefreshTokensResponse {
+    model.v1.OperationStatus status = 1;
+    model.v1.AuthTokens tokens = 2;  // Новая пара токенов
 }
 
 // ========== Завершение сессии ========== //
@@ -101,4 +102,8 @@ message TokenRefreshResponse {
 message LogoutRequest {
     string access_token = 1;   // Текущий access token
     string refresh_token = 2;  // Текущий refresh token
+}
+
+message LogoutResponse {
+    model.v1.OperationStatus status = 1;  // Статус операции
 }

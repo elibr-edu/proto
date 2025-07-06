@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package model;
+package model.v1;
 
-option go_package = "github.com/WhiCu/elibr-proto/gen/go/model;model";
-// Для Python используем стандартную генерацию gRPC
-// py_generic_services устарело и не рекомендуется
+// option go_package = "github.com/WhiCu/elibr-proto/gen/go/model;model";
+// // Для Python используем стандартную генерацию gRPC
+// // py_generic_services устарело и не рекомендуется
 
 import "google/protobuf/timestamp.proto";
 
