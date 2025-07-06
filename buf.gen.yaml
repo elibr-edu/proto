@@ -3,13 +3,15 @@ managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      value: github.com/WhiCu/elibr-proto
+      value: github.com/WhiCu/elibr-proto/gen/go
 plugins:
   - local: protoc-gen-go
     out: gen/go
-    opt: paths=source_relative
-  - remote: protoc-gen-go-grpc
+    opt: 
+      - paths=source_relative
+  - local: protoc-gen-go-grpc
     out: gen/go
-    opt: paths=source_relative
+    opt: 
+      - paths=source_relative
 inputs:
   - directory: proto
