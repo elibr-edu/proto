@@ -13,5 +13,13 @@ plugins:
     out: gen/go
     opt: 
       - paths=source_relative
+  - local: protoc-gen-connect-go
+    out: gen/go
+    opt: 
+      - paths=source_relative
+  - local: protoc-gen-openapiv2
+    out: gen/go
+    opt: 
+      - paths=source_relative
 inputs:
   - directory: proto
